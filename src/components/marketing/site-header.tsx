@@ -25,6 +25,7 @@ export function SiteHeader({ scanTo }: { scanTo: string }) {
           <Wordmark />
         </a>
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex">
+          <a href="#scan" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Scan</a>
           <a href="#record" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Record</a>
           <a href="#inventory" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Inventory</a>
         </nav>

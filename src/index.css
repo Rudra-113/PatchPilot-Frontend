@@ -15,6 +15,7 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-fg: var(--accent-fg);
+  --color-complement: var(--complement);
   --color-secure: var(--secure);
   --color-secure-dim: var(--secure-dim);
   --color-warning: var(--warning);
@@ -44,6 +45,7 @@
   --accent: #e4c27a;
   --accent-hover: #f0d7a4;
   --accent-fg: #1a1408;
+  --complement: #7aa2f0;
   --secure: #8fbf8a;
   --secure-dim: rgba(143, 191, 138, 0.14);
   --warning: #e0a15a;
@@ -70,6 +72,7 @@
   --accent: #8c6a2e;
   --accent-hover: #735622;
   --accent-fg: #fffaf2;
+  --complement: #2457b8;
   --secure: #2f6b45;
   --secure-dim: rgba(47, 107, 69, 0.1);
   --warning: #8a5a12;
@@ -239,10 +242,32 @@ textarea {
   animation: pp-progress 900ms ease-in-out infinite;
 }
 
+@keyframes pp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.pp-caret {
+  animation: pp-caret 1s steps(1) infinite;
+}
+
+@keyframes pp-live {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pp-live {
+  animation: pp-live 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pp-particle,
   .pp-route-bar,
   .pp-draw,
+  .pp-caret,
+  .pp-live,
   .technical-grid.is-drift {
     animation: none !important;
   }
