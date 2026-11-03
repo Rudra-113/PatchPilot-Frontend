@@ -91,10 +91,7 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(980px 460px at 78% -12%, rgba(62, 192, 255, 0.07), transparent 58%),
-    radial-gradient(720px 420px at -8% 8%, rgba(139, 147, 246, 0.05), transparent 52%),
-    var(--bg);
+  background: var(--bg);
   color: var(--fg);
   font-family: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: 'ss01', 'cv11';

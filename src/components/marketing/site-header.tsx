@@ -1,44 +1,35 @@
-import { motion, useMotionValueEvent, useScroll } from 'framer-motion'
+import { useMotionValueEvent, useScroll } from 'framer-motion'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Wordmark } from '@/components/brand/mark'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-const LINKS = [
-  ['Method', '#method'],
-  ['Finding', '#finding'],
-  ['Verification', '#verification'],
-] as const
-
 export function SiteHeader({ scanTo }: { scanTo: string }) {
   const { scrollY } = useScroll()
-  const [scrolled, setScrolled] = useState(() => typeof window !== 'undefined' && window.scrollY > 12)
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.scrollY > 8)
   useMotionValueEvent(scrollY, 'change', (value) => {
-    const next = value > 12
-    setScrolled((current) => (current === next ? current : next))
+    const next = value > 8
+    setCompact((current) => (current === next ? current : next))
   })
 
   return (
-    <motion.header
+    <header
       className={cn(
-        'fixed inset-x-0 top-0 z-30 transition-[background-color,border-color,backdrop-filter] duration-200',
-        scrolled ? 'border-b border-line bg-[#070b14]/80 backdrop-blur-md' : 'border-b border-transparent',
+        'fixed inset-x-0 top-0 z-30 transition-[height,background-color,border-color] duration-200',
+        compact ? 'h-12 border-b border-line bg-[#070b14]/95' : 'h-16 border-b border-transparent bg-transparent',
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
-        <a href="#top" className="rounded-sm">
+      <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-5">
+        <a href="#top">
           <Wordmark />
         </a>
-        <nav className="hidden items-center gap-6 md:flex">
-          {LINKS.map(([label, href]) => (
-            <a key={href} href={href} className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">
-              {label}
-            </a>
-          ))}
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex">
+          <a href="#record" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Record</a>
+          <a href="#inventory" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Inventory</a>
         </nav>
-        <div className="flex items-center gap-2">
-          <Link to="/login" className="hidden h-9 items-center px-3 text-[13px] text-secondary transition-colors hover:text-foreground sm:inline-flex">
+        <div className="flex items-center gap-1">
+          <Link to="/login" className="hidden h-8 items-center px-3 text-[13px] text-secondary transition-colors duration-150 hover:text-foreground sm:inline-flex">
             Sign in
           </Link>
           <Button asChild>
@@ -46,6 +37,6 @@ export function SiteHeader({ scanTo }: { scanTo: string }) {
           </Button>
         </div>
       </div>
-    </motion.header>
+    </header>
   )
 }
