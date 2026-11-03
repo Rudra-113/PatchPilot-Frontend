@@ -38,9 +38,14 @@ export function DashboardLayout() {
       <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <div className="sticky top-0 hidden h-screen shrink-0 lg:block" style={{ width: collapsed ? 68 : 220 }}>
+      <motion.div
+        className="sticky top-0 hidden h-screen shrink-0 overflow-hidden lg:block"
+        initial={false}
+        animate={{ width: collapsed ? 72 : 236 }}
+        transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 340, damping: 32 }}
+      >
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} className="w-full" />
-      </div>
+      </motion.div>
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen} title="Navigation">
         <Sidebar collapsed={false} onNavigate={() => setMobileOpen(false)} />
       </Sheet>
