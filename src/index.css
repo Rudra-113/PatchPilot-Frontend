@@ -262,12 +262,27 @@ textarea {
   animation: pp-live 1.4s ease-in-out infinite;
 }
 
+@keyframes pp-sheen {
+  0% {
+    transform: translateX(-130%) skewX(-12deg);
+  }
+  55%,
+  100% {
+    transform: translateX(420%) skewX(-12deg);
+  }
+}
+
+.pp-sheen {
+  animation: pp-sheen 2.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pp-particle,
   .pp-route-bar,
   .pp-draw,
   .pp-caret,
   .pp-live,
+  .pp-sheen,
   .technical-grid.is-drift {
     animation: none !important;
   }

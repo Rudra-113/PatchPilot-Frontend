@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { GithubMark } from '@/components/brand/github-mark'
+import { ScanBackdrop } from '@/components/layout/scan-backdrop'
+import { ScanSteps } from '@/components/layout/scan-steps'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -65,13 +67,11 @@ export default function ConnectRepository() {
   }
 
   return (
-    <>
+    <div className="relative -mx-4 -mt-6 min-h-[calc(100dvh-3.5rem)] overflow-hidden px-4 pt-6 pb-12 sm:-mx-6 sm:px-6">
+      <ScanBackdrop />
+      <div className="relative z-10">
       <PageHeader kicker="Scan repository" title="Connect the source" description="GitHub URLs are parsed here. No remote is contacted. Commit metadata is filled locally until the PatchPilot API is connected." />
-      <ol className="mb-6 flex max-w-3xl gap-3 font-mono text-[11px] tracking-[0.12em] uppercase">
-        <li className="border border-line px-3 py-2 text-muted">01 Project</li>
-        <li className="border border-complement/50 bg-complement/10 px-3 py-2 text-complement">02 Repository</li>
-        <li className="border border-line px-3 py-2 text-muted">03 Scan</li>
-      </ol>
+      <ScanSteps current={2} />
       <div className="max-w-3xl space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="project">Project</Label>
@@ -155,6 +155,7 @@ export default function ConnectRepository() {
         ) : null}
         {error ? <p className="text-[13px] text-critical">{error}</p> : null}
       </div>
-    </>
+      </div>
+    </div>
   )
 }
