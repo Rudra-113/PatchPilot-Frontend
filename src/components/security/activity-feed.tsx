@@ -33,7 +33,7 @@ export function ActivityFeed({ events }: { events: ActivityEvent[] }) {
             className="grid grid-cols-[68px_minmax(0,1fr)] gap-3 border-t border-line px-4 py-2.5 first:border-t-0"
             initial={reduced ? false : { opacity: 0, x: 12 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.35, delay: reduced ? 0 : 0.08 * index, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduced ? 0 : 0.5, delay: reduced ? 0 : 0.07 * index, ease: [0.22, 1, 0.36, 1] }}
           >
             <time className="pt-0.5 font-mono text-[11px] text-muted tabular" dateTime={event.at}>
               {formatClock(event.at)}

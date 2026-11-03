@@ -18,10 +18,10 @@ export default function Repositories() {
         <EmptyState kicker="Nothing connected" title="No repositories yet." body="Connect GitHub, a ZIP, or a directory from a project." action={<Button asChild><Link to="/app/projects/new">Create project</Link></Button>} />
       ) : null}
       <div className="overflow-hidden rounded-lg border border-line bg-surface">
-        {repositories.data?.map((repository) => {
+        {repositories.data?.map((repository, index) => {
           const project = projects.data?.find((item) => item.id === repository.projectId)
           return (
-            <article key={repository.id} className="grid gap-2 border-t border-line px-4 py-3 first:border-t-0 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_140px_auto] md:items-center">
+            <article key={repository.id} className="pp-rise pp-row grid gap-2 border-t border-line px-4 py-3 first:border-t-0 hover:bg-foreground/4 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_140px_auto] md:items-center" style={{ animationDelay: `${index * 50}ms` }}>
               <div>
                 <p className="text-[13px] font-medium">{repository.name}</p>
                 <p className="truncate font-mono text-[11px] text-muted">{repository.url}</p>

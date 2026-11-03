@@ -70,8 +70,8 @@ export default function Vulnerabilities() {
       {vulns.data && vulns.data.items.length > 0 ? (
         <>
           <div className="space-y-2 lg:hidden">
-            {vulns.data.items.map((item) => (
-              <Link key={item.id} to={`/app/vulnerabilities/${item.id}`} className="block rounded-lg border border-line bg-surface p-3">
+            {vulns.data.items.map((item, index) => (
+              <Link key={item.id} to={`/app/vulnerabilities/${item.id}`} className="pp-card pp-rise block rounded-lg border border-line bg-surface p-3" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                 <div className="flex items-center justify-between gap-2">
                   <SeverityBadge severity={item.severity} short />
                   <StatusText status={item.status} />
@@ -109,7 +109,7 @@ function FindingTable({ items }: { items: Array<{ id: string; severity: Severity
             <Link
               key={item.id}
               to={`/app/vulnerabilities/${item.id}`}
-              className="absolute right-0 left-0 grid grid-cols-[76px_minmax(180px,1.3fr)_minmax(160px,1fr)_64px_88px_96px_120px] items-center gap-2 border-b border-line px-3 text-[13px] hover:bg-foreground/3"
+              className="pp-row absolute right-0 left-0 grid grid-cols-[76px_minmax(180px,1.3fr)_minmax(160px,1fr)_64px_88px_96px_120px] items-center gap-2 border-b border-line px-3 text-[13px] hover:bg-foreground/4"
               style={{ height: virtual.size, transform: `translateY(${virtual.start}px)` }}
             >
               <SeverityBadge severity={item.severity} short />

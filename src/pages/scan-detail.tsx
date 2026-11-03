@@ -39,8 +39,8 @@ export default function ScanDetail() {
         {data.stages.map((stage) => (
           <div key={stage.key} className="h-1 flex-1 overflow-hidden bg-foreground/10">
             <div
-              className={stage.status === 'failed' ? 'h-full bg-critical' : stage.status === 'running' ? 'h-full bg-complement' : 'h-full bg-secure'}
-              style={{ width: stage.status === 'completed' || stage.status === 'failed' ? '100%' : stage.status === 'running' ? `${stage.progress}%` : '0%' }}
+              className={cn('pp-glide h-full origin-left', stage.status === 'failed' ? 'bg-critical' : stage.status === 'running' ? 'bg-complement' : 'bg-secure')}
+              style={{ transform: `scaleX(${stage.status === 'completed' || stage.status === 'failed' ? 1 : stage.status === 'running' ? stage.progress / 100 : 0})` }}
             />
           </div>
         ))}
@@ -70,8 +70,8 @@ export default function ScanDetail() {
 function StageRow({ stage, index, last }: { stage: ScanStage; index: number; last: boolean }) {
   return (
     <li
-      className={cn('px-4 py-3', !last && 'border-b border-line', stage.status === 'running' && 'bg-complement/5')}
-      style={{ boxShadow: stage.status === 'running' ? 'inset 2px 0 0 var(--complement)' : stage.status === 'completed' ? 'inset 2px 0 0 var(--secure)' : stage.status === 'failed' ? 'inset 2px 0 0 var(--critical)' : undefined }}
+      className={cn('pp-rise px-4 py-3', !last && 'border-b border-line', stage.status === 'running' && 'bg-complement/5')}
+      style={{ animationDelay: `${index * 70}ms`, boxShadow: stage.status === 'running' ? 'inset 2px 0 0 var(--complement)' : stage.status === 'completed' ? 'inset 2px 0 0 var(--secure)' : stage.status === 'failed' ? 'inset 2px 0 0 var(--critical)' : undefined }}
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-[14px] font-medium">
@@ -87,7 +87,7 @@ function StageRow({ stage, index, last }: { stage: ScanStage; index: number; las
       <p className="mt-1 text-[13px]">{stage.detail}</p>
       {stage.status === 'running' ? (
         <div className="relative mt-2 h-1 overflow-hidden bg-foreground/10">
-          <div className="relative h-full overflow-hidden bg-complement transition-[width] duration-300" style={{ width: `${stage.progress}%` }}>
+          <div className="pp-glide relative h-full overflow-hidden bg-complement" style={{ width: `${stage.progress}%` }}>
             <span className="pp-sheen pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-white/30" />
           </div>
         </div>
@@ -210,7 +210,7 @@ function ScanTranscript({ scan, running }: { scan: Scan; running: boolean }) {
         })}
       </pre>
       <div className="h-px bg-line">
-        <div className="h-full bg-complement transition-[width] duration-75" style={{ width: `${totalChars ? (typedChars / totalChars) * 100 : 0}%` }} />
+        <div className="pp-glide h-full origin-left bg-complement" style={{ transform: `scaleX(${totalChars ? typedChars / totalChars : 0})` }} />
       </div>
     </div>
   )

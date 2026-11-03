@@ -53,8 +53,8 @@ export default function Reports() {
       {reports.isError ? <ErrorState error={reports.error} onRetry={() => void reports.refetch()} /> : null}
       {reports.data && reports.data.length === 0 ? <EmptyState kicker="No reports" title="No reports yet." body="Generate one from the current findings." /> : null}
       <div className="overflow-hidden rounded-lg border border-line bg-surface">
-        {reports.data?.map((report) => (
-          <article key={report.id} className="flex flex-col gap-2 border-t border-line px-4 py-3 first:border-t-0 sm:flex-row sm:items-center sm:justify-between">
+        {reports.data?.map((report, index) => (
+          <article key={report.id} className="pp-rise pp-row flex flex-col gap-2 border-t border-line px-4 py-3 first:border-t-0 hover:bg-foreground/4 sm:flex-row sm:items-center sm:justify-between" style={{ animationDelay: `${index * 50}ms` }}>
             <div>
               <h2 className="text-[14px] font-medium">{report.title}</h2>
               <p className="text-[12px] text-secondary">{report.summary}</p>

@@ -41,7 +41,7 @@ function Item({
           className={cn('relative flex h-10 items-center gap-2.5 px-2', collapsed && 'justify-center px-0')}
           initial={reduced ? false : { opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          whileHover={reduced ? undefined : { x: collapsed ? 0 : 3 }}
+          whileHover={reduced ? undefined : { x: collapsed ? 0 : 2 }}
           whileTap={reduced ? undefined : { scale: 0.96 }}
           transition={{ duration: 0.28, delay: reduced ? 0 : index * 0.035, ease: [0.22, 1, 0.36, 1] }}
           onPointerDown={() => {
@@ -52,14 +52,14 @@ function Item({
             <motion.span
               layoutId={`nav-wash-${scope}`}
               className="absolute inset-0 rounded-md bg-gradient-to-r from-accent/18 via-accent/8 to-complement/14"
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 460, damping: 34 }}
+              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 32 }}
             />
           ) : null}
           {isActive ? (
             <motion.span
               layoutId={`nav-rail-${scope}`}
               className="absolute top-1.5 bottom-1.5 left-0 w-[3px] rounded-full bg-accent shadow-[0_0_12px_var(--accent)]"
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 32 }}
+              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 34 }}
             />
           ) : null}
           {ripple > 0 && !reduced ? (
@@ -75,7 +75,7 @@ function Item({
           <motion.span
             className="relative grid size-7 place-items-center"
             whileTap={reduced ? undefined : { scale: 1.2, rotate: -10 }}
-            transition={{ type: 'spring', stiffness: 560, damping: 16 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
           >
             <Icon className={cn('size-4', isActive ? 'text-accent' : 'text-secondary transition-colors duration-150 group-hover:text-complement')} strokeWidth={1.75} />
           </motion.span>

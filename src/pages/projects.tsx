@@ -43,8 +43,8 @@ export default function Projects() {
         <EmptyState kicker="No projects" title="Create the first project." body="Name the service, then connect its repository. The scan is the next step, not a form field." action={<Button asChild><Link to="/app/projects/new">Create project</Link></Button>} />
       ) : null}
       <div className="grid gap-3 xl:grid-cols-2">
-        {projects.data?.map((project) => (
-          <article key={project.id} className="rounded-lg border border-line bg-surface p-4 transition-colors duration-150 hover:border-line-strong">
+        {projects.data?.map((project, index) => (
+          <article key={project.id} className="pp-card pp-rise rounded-lg border border-line bg-surface p-4" style={{ animationDelay: `${index * 55}ms` }}>
             <div className="flex gap-4">
               <ScoreRing score={project.securityScore} size={64} caption={project.scanFreshness === 'unscanned' ? '—' : String(project.securityScore)} />
               <div className="min-w-0 flex-1">

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Frame } from '@/components/layout/frame'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
@@ -203,12 +204,14 @@ export function AnalysisTheater({
   useEffect(() => {
     if (reduced || !running) return
     const started = performance.now()
-    const timer = window.setInterval(() => {
-      const next = Math.min(DURATION, performance.now() - started)
+    let frame = 0
+    const tick = (now: number) => {
+      const next = Math.min(DURATION, now - started)
       setClock((current) => (current.key === stage.key ? { ...current, elapsed: next } : current))
-      if (next >= DURATION) window.clearInterval(timer)
-    }, 40)
-    return () => window.clearInterval(timer)
+      if (next < DURATION) frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
   }, [stage.key, running, reduced])
 
   const elapsed = clock.elapsed
@@ -227,7 +230,7 @@ export function AnalysisTheater({
     <Frame>
       <div className="overflow-hidden border border-line bg-inset shadow-[inset_0_2px_0_var(--accent)]">
         <div className="h-0.5 bg-foreground/10">
-          <div className="h-full bg-complement transition-[width] duration-75" style={{ width: `${progress * 100}%` }} />
+          <div className="h-full origin-left bg-complement" style={{ transform: `scaleX(${progress})` }} />
         </div>
         <div className="flex items-start justify-between gap-3 border-b border-line px-3 py-2.5">
           <div className="min-w-0">
@@ -244,17 +247,18 @@ export function AnalysisTheater({
           </p>
         </div>
         <div className="relative px-3 py-3">
-          {beamOn ? (
-            <div
-              className="pointer-events-none absolute inset-x-3 z-10 h-px bg-complement"
-              style={{ top: `${18 + sweep * 78}%` }}
-            />
-          ) : null}
+          <div
+            className="pointer-events-none absolute inset-x-3 z-10 transition-opacity duration-500"
+            style={{ top: `${16 + sweep * 76}%`, opacity: beamOn ? 1 : 0 }}
+          >
+            <div className="absolute -top-4 right-0 left-0 h-8 bg-gradient-to-b from-transparent via-complement/25 to-transparent" />
+            <div className="h-px bg-complement" />
+          </div>
           <ol className="relative">
             {sourceAt >= 0 && sinkAt > sourceAt ? (
               <span
                 aria-hidden="true"
-                className="absolute left-[52px] w-px origin-top bg-complement"
+                className="absolute left-[52px] w-px origin-top bg-complement transition-opacity duration-300"
                 style={{
                   top: 8 + sourceAt * 28,
                   height: (sinkAt - sourceAt) * 28,
@@ -270,8 +274,8 @@ export function AnalysisTheater({
                 <li
                   key={`${line.n}-${line.text}`}
                   className={cn(
-                    'grid h-7 grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-2 font-mono text-[12px]',
-                    revealed ? 'opacity-100' : 'opacity-0',
+                    'grid h-7 grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-2 font-mono text-[12px] transition-[opacity,transform,background-color,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                    revealed ? 'translate-x-0 opacity-100' : '-translate-x-1.5 opacity-0',
                     onBeam && 'bg-complement/10',
                     marked && line.mark === 'sink' && 'bg-critical/15 text-critical',
                     marked && line.mark === 'source' && 'text-accent',
@@ -296,7 +300,7 @@ export function AnalysisTheater({
             {lens.trace.map((part, index) => (
               <span key={part} className="inline-flex items-center gap-2">
                 {index > 0 ? <span className="text-muted">→</span> : null}
-                <span className={trace > index / lens.trace.length ? 'text-foreground' : 'text-muted'}>{part}</span>
+                <span className={cn('transition-colors duration-500', trace > index / lens.trace.length ? 'text-foreground' : 'text-muted')}>{part}</span>
               </span>
             ))}
           </div>
@@ -313,11 +317,18 @@ export function AnalysisTheater({
             <span
               key={item.label}
               className={cn(
-                'flex-1 px-2 py-1.5 text-center font-mono text-[10px] tracking-[0.14em] uppercase',
-                index === phase ? 'bg-complement/10 text-complement' : index < phase ? 'text-secondary' : 'text-muted',
+                'relative flex-1 px-2 py-1.5 text-center font-mono text-[10px] tracking-[0.14em] uppercase transition-colors duration-500',
+                index === phase ? 'text-complement' : index < phase ? 'text-secondary' : 'text-muted',
               )}
             >
-              {item.label}
+              {index === phase ? (
+                <motion.span
+                  layoutId="analysis-phase"
+                  className="absolute inset-0 bg-complement/10"
+                  transition={{ duration: reduced ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] }}
+                />
+              ) : null}
+              <span className="relative">{item.label}</span>
             </span>
           ))}
         </div>

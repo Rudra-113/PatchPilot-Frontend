@@ -108,7 +108,7 @@ function ScoreCard({ score, delta }: { score: number; delta: number }) {
   const sign = delta > 0 ? '+' : ''
   return (
     <motion.div className="lg:col-span-4" {...enter(0, reduced)}>
-      <Panel className="flex h-full flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:gap-5">
+      <Panel className="pp-card flex h-full flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:gap-5">
         <ScoreRing
           score={score}
           size={124}
@@ -138,7 +138,7 @@ function CriticalCard({ count }: { count: number }) {
   const marks = Math.min(8, Math.max(count, 4))
   return (
     <motion.div className="lg:col-span-4" {...enter(0.08, reduced)}>
-      <Link to="/app/vulnerabilities?severity=critical&status=open" className="flex h-full flex-col rounded-lg border border-line bg-surface p-5 transition-colors hover:border-line-strong">
+      <Link to="/app/vulnerabilities?severity=critical&status=open" className="pp-card flex h-full flex-col rounded-lg border border-line bg-surface p-5">
         <p className="text-[11px] tracking-[0.14em] text-critical uppercase">Critical</p>
         <p className="mt-3 text-[40px] leading-none font-medium tabular">{shown}</p>
         <div className="mt-4 flex h-8 items-end gap-1" aria-hidden="true">
@@ -169,7 +169,7 @@ function FixedCard({ fixed, open }: { fixed: number; open: number }) {
   const ratioShown = useCountUp(ratio, 900)
   return (
     <motion.div className="lg:col-span-4" {...enter(0.16, reduced)}>
-      <Panel className="flex h-full flex-col p-5">
+      <Panel className="pp-card flex h-full flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <p className="text-[11px] tracking-[0.14em] text-secure uppercase">Fixed</p>
           <p className="font-mono text-[22px] leading-none text-secure tabular">{ratioShown}%</p>
@@ -232,7 +232,7 @@ function MeterLink({ severity, value, peak, total }: { severity: Severity; value
   return (
     <Link
       to={`/app/vulnerabilities?severity=${severity}&status=open`}
-      className="px-4 py-4 transition-colors hover:bg-elevated"
+      className="pp-row px-4 py-4 hover:bg-elevated"
     >
       <p className="text-[11px] tracking-[0.14em] text-muted uppercase">{SEVERITY_LABEL[severity]}</p>
       <div className="mt-2 flex items-end justify-between gap-3">
