@@ -276,6 +276,18 @@ textarea {
   animation: pp-sheen 2.6s ease-in-out infinite;
 }
 
+@keyframes pp-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pp-orbit {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pp-orbit 28s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pp-particle,
   .pp-route-bar,
@@ -283,6 +295,7 @@ textarea {
   .pp-caret,
   .pp-live,
   .pp-sheen,
+  .pp-orbit,
   .technical-grid.is-drift {
     animation: none !important;
   }
