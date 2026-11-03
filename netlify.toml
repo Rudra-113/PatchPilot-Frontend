@@ -1,0 +1,40 @@
+# Vite 8 needs Node 20.19+ or 22.12+. An older default publishes the source
+# index.html, whose /src/main.tsx script never runs, so the site stays blank.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Netlify's asset post-processing rewrites Vite's module scripts and leaves a
+# blank page. Leave the built files untouched.
+[build.processing]
+  skip_processing = true
+
+[build.processing.html]
+  pretty_urls = false
+
+# Set VITE_API_URL in the Netlify UI to the Railway origin, then redeploy.
+# Example: https://your-service.up.railway.app
+# Vite inlines it at build time. A value saved in Settings overrides it.
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

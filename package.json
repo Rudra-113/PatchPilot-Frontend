@@ -1,6 +1,9 @@
 {
   "name": "patchpilot",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "version": "0.1.0",
   "type": "module",
   "scripts": {

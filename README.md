@@ -29,11 +29,17 @@ The primary finding in the demo is SQL injection in `app/api/users.py` at line 4
 
 ## Connect a FastAPI backend
 
-Leave `VITE_API_BASE_URL` empty to keep the local workspace. Set it, or save an API base URL in Settings, when the backend is ready:
+Leave `VITE_API_URL` empty to keep the local workspace. Set it to the Railway FastAPI origin, or save an API base URL in Settings, when the backend is ready:
 
 ```bash
-VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_API_URL=https://your-service.up.railway.app
 ```
+
+`VITE_API_BASE_URL` is still read if `VITE_API_URL` is empty. A value saved in Settings overrides both. The Railway service must allow the site origin in CORS.
+
+## Netlify
+
+`netlify.toml` builds with Node 22 and publishes `dist`. Client routes fall back to `index.html`. Set `VITE_API_URL` in the Netlify environment, then trigger a new deploy so the value is baked into the bundle.
 
 The client sends `Authorization: Bearer <session token>` and `Content-Type: application/json`. Errors should return `{ "message": "..." }`.
 

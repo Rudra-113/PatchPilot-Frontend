@@ -2,10 +2,15 @@ import { mockRequest } from '@/services/mock/router'
 import { readSession } from '@/services/session-store'
 import { ApiError } from '@/services/errors'
 
+function configuredBase() {
+  const fromEnv = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || ''
+  return String(fromEnv).trim().replace(/\/$/, '')
+}
+
 export function apiBase() {
   const stored = localStorage.getItem('patchpilot.apiBaseUrl')?.trim()
   if (stored) return stored.replace(/\/$/, '')
-  return (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/$/, '')
+  return configuredBase()
 }
 
 export async function request<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
@@ -37,7 +42,13 @@ export async function request<T>(path: string, init?: { method?: string; body?: 
     throw new ApiError(response.status, message)
   }
   if (response.status === 204) return undefined as T
-  return (await response.json()) as T
+  const text = await response.text()
+  if (!text) return undefined as T
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    throw new ApiError(response.status, 'The API returned a response that was not JSON.')
+  }
 }
 
 export { ApiError }
