@@ -2,10 +2,11 @@ import { Link, useParams } from 'react-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ErrorState } from '@/components/feedback/states'
 import { PageHeader } from '@/components/layout/page-header'
+import { AnalysisTheater } from '@/components/security/analysis-theater'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
-import { useScan } from '@/hooks/queries'
+import { useProject, useScan } from '@/hooks/queries'
 import { elapsed, formatDuration } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Scan, ScanStage } from '@/types/api'
@@ -13,6 +14,7 @@ import type { Scan, ScanStage } from '@/types/api'
 export default function ScanDetail() {
   const { scanId = '' } = useParams()
   const scan = useScan(scanId)
+  const project = useProject(scan.data?.projectId ?? '')
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
     if (scan.data?.status !== 'running') return
@@ -24,6 +26,7 @@ export default function ScanDetail() {
   if (scan.isError || !scan.data) return <ErrorState error={scan.error} onRetry={() => void scan.refetch()} />
   const data = scan.data
   const running = data.status === 'running'
+  const focus = data.stages.find((stage) => stage.status === 'running') ?? [...data.stages].reverse().find((stage) => stage.status === 'completed') ?? data.stages[0]
   return (
     <>
       <PageHeader
@@ -32,13 +35,28 @@ export default function ScanDetail() {
         description={`${data.branch} · ${data.trigger} · ${running ? elapsed(data.startedAt, now) : data.completedAt ? elapsed(data.startedAt, new Date(data.completedAt).getTime()) : 'Queued'}`}
         actions={data.status === 'completed' ? <Button asChild><Link to={`/app/vulnerabilities?projectId=${data.projectId}&status=open`}>Review findings</Link></Button> : null}
       />
-      <div className="grid max-w-5xl items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <ScanTranscript scan={data} running={running} />
-        <ol className="overflow-hidden border border-line bg-surface">
-          {data.stages.map((stage, index) => (
-            <StageRow key={stage.key} stage={stage} last={index === data.stages.length - 1} />
-          ))}
-        </ol>
+      <div className="mb-4 flex gap-1" aria-hidden="true">
+        {data.stages.map((stage) => (
+          <div key={stage.key} className="h-1 flex-1 overflow-hidden bg-foreground/10">
+            <div
+              className={stage.status === 'failed' ? 'h-full bg-critical' : stage.status === 'running' ? 'h-full bg-complement' : 'h-full bg-secure'}
+              style={{ width: stage.status === 'completed' || stage.status === 'failed' ? '100%' : stage.status === 'running' ? `${stage.progress}%` : '0%' }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)]">
+        <div className="order-2 xl:sticky xl:top-6 xl:order-1 xl:self-start">
+          <ScanTranscript scan={data} running={running} />
+        </div>
+        <div className="order-1 space-y-3 xl:order-2">
+          {focus ? <AnalysisTheater stage={focus} branch={data.branch} language={project.data?.language} running={running && focus.status === 'running'} /> : null}
+          <ol className="overflow-hidden border border-line bg-surface">
+            {data.stages.map((stage, index) => (
+              <StageRow key={stage.key} stage={stage} index={index} last={index === data.stages.length - 1} />
+            ))}
+          </ol>
+        </div>
       </div>
       {data.status === 'completed' ? (
         <p className="mt-4 max-w-3xl text-[13px] text-secondary">
@@ -49,33 +67,39 @@ export default function ScanDetail() {
   )
 }
 
-function StageRow({ stage, last }: { stage: ScanStage; last: boolean }) {
+function StageRow({ stage, index, last }: { stage: ScanStage; index: number; last: boolean }) {
   return (
-    <li className={cn('grid grid-cols-[20px_minmax(0,1fr)] gap-3 px-4 py-4', !last && 'border-b border-line')}>
-      <span className="pt-1">
-        <span className={cn('block size-2 rounded-full', stage.status === 'completed' ? 'bg-secure' : stage.status === 'running' ? 'pp-live bg-complement' : stage.status === 'failed' ? 'bg-critical' : 'bg-line-strong')} />
-      </span>
-      <div>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-[14px] font-medium">{stage.name}</h2>
-          <span className="font-mono text-[11px] text-muted">{formatDuration(stage.durationMs)}</span>
-        </div>
-        <p className="mt-0.5 text-[12px] text-secondary">{stage.scanner}{stage.resultCount != null ? ` · ${stage.resultCount}` : ''}</p>
-        <p className="mt-1 text-[13px] text-foreground">{stage.detail}</p>
-        {stage.status === 'running' ? (
-          <div className="mt-2 h-px overflow-hidden bg-foreground/10">
-            <div className="h-full bg-complement transition-[width] duration-300" style={{ width: `${stage.progress}%` }} />
-          </div>
-        ) : null}
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-          {stage.steps.map((step) => (
-            <li key={step.label} className="flex items-center gap-1.5 text-[12px] text-secondary">
-              <span className={cn('size-1.5 rounded-full', step.status === 'completed' ? 'bg-secure' : step.status === 'running' ? 'bg-complement' : 'bg-line-strong')} />
-              {step.label}
-            </li>
-          ))}
-        </ul>
+    <li
+      className={cn('px-4 py-3', !last && 'border-b border-line', stage.status === 'running' && 'bg-complement/5')}
+      style={{ boxShadow: stage.status === 'running' ? 'inset 2px 0 0 var(--complement)' : stage.status === 'completed' ? 'inset 2px 0 0 var(--secure)' : stage.status === 'failed' ? 'inset 2px 0 0 var(--critical)' : undefined }}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-[14px] font-medium">
+          <span className="mr-2 font-mono text-[11px] text-muted">{String(index + 1).padStart(2, '0')}</span>
+          {stage.name}
+        </h2>
+        <span className="inline-flex items-center gap-2 font-mono text-[11px] text-muted">
+          <span className={cn('size-1.5 rounded-full', stage.status === 'completed' ? 'bg-secure' : stage.status === 'running' ? 'pp-live bg-complement' : stage.status === 'failed' ? 'bg-critical' : 'bg-line-strong')} />
+          {formatDuration(stage.durationMs)}
+        </span>
       </div>
+      <p className="mt-1 text-[12px] text-secondary">{stage.scanner}{stage.resultCount != null ? ` · ${stage.resultCount}` : ''}</p>
+      <p className="mt-1 text-[13px]">{stage.detail}</p>
+      {stage.status === 'running' ? (
+        <div className="relative mt-2 h-1 overflow-hidden bg-foreground/10">
+          <div className="relative h-full overflow-hidden bg-complement transition-[width] duration-300" style={{ width: `${stage.progress}%` }}>
+            <span className="pp-sheen pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-white/30" />
+          </div>
+        </div>
+      ) : null}
+      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        {stage.steps.map((step) => (
+          <li key={step.label} className="flex items-center gap-1.5 text-[12px] text-secondary">
+            <span className={cn('size-1.5 rounded-full', step.status === 'completed' ? 'bg-secure' : step.status === 'running' ? 'bg-complement' : 'bg-line-strong')} />
+            {step.label}
+          </li>
+        ))}
+      </ul>
     </li>
   )
 }
