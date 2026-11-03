@@ -57,24 +57,37 @@ export default function Landing() {
     <div id="top" className="min-h-screen">
       <SiteHeader scanTo={scanTo} />
       <main>
-        <section className="mx-auto w-full max-w-6xl px-5 pt-24 pb-16 sm:pt-28">
-          <p className="font-mono text-[11px] tracking-[0.16em] text-muted uppercase">Security remediation</p>
-          <h1 className="mt-4 max-w-[12em] text-[42px] leading-[0.98] font-medium tracking-[-0.035em] sm:text-[64px] lg:text-[72px]">
-            Autonomous vulnerability remediation for modern codebases.
-          </h1>
-          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-secondary">
-            Detect vulnerabilities. Understand the root cause. Generate secure patches. Validate the fix.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-2">
-            <Button size="lg" className="h-10 px-3.5" asChild>
-              <Link to={scanTo}>Scan Repository</Link>
-            </Button>
-            <Button size="lg" variant="secondary" className="h-10 px-3.5" onClick={() => void viewDemo()}>
-              View Demo
-            </Button>
+        <section className="relative mx-auto w-full max-w-6xl px-5 pt-24 pb-16 sm:pt-28">
+          <div className="pointer-events-none absolute -top-10 left-0 h-[420px] w-[min(720px,90vw)] bg-[radial-gradient(ellipse_at_top_left,rgba(228,194,122,0.14),transparent_62%)]" />
+          <div className="relative">
+            <p className="flex items-center gap-3 font-mono text-[11px] tracking-[0.18em] text-accent uppercase">
+              <span className="h-px w-8 bg-accent" />
+              Security remediation
+            </p>
+            <h1 className="mt-5 max-w-[11em] text-[44px] leading-[0.96] font-medium tracking-[-0.04em] text-foreground sm:text-[68px] lg:text-[76px]">
+              Autonomous vulnerability remediation for modern codebases.
+            </h1>
+            <p className="mt-6 max-w-md text-[16px] leading-relaxed text-secondary">
+              Detect vulnerabilities. Understand the root cause. Generate secure patches. Validate the fix.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-2">
+              <Button size="lg" className="h-11 px-4" asChild>
+                <Link to={scanTo}>Scan Repository</Link>
+              </Button>
+              <Button size="lg" variant="secondary" className="h-11 px-4" onClick={() => void viewDemo()}>
+                View Demo
+              </Button>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] text-muted">
+              {['Semgrep', 'CodeQL', 'Bandit', 'Trivy', 'Gitleaks'].map((name) => (
+                <li key={name} className="flex items-center gap-2">
+                  <span className="size-1 bg-accent" />
+                  {name}
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="mt-8 font-mono text-[11px] text-muted">Semgrep · CodeQL · Bandit · Trivy · Gitleaks</p>
-          <div className="mt-12">
+          <div className="relative mt-14">
             <ProductConsole stage="detected" />
           </div>
         </section>

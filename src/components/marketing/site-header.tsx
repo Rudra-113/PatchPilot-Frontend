@@ -17,7 +17,7 @@ export function SiteHeader({ scanTo }: { scanTo: string }) {
     <header
       className={cn(
         'fixed inset-x-0 top-0 z-30 transition-[height,background-color,border-color] duration-200',
-        compact ? 'h-12 border-b border-line bg-[#070b14]/95' : 'h-16 border-b border-transparent bg-transparent',
+        compact ? 'h-12 border-b border-line bg-[#0c0b0a]/95' : 'h-16 border-b border-transparent bg-transparent',
       )}
     >
       <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-5">

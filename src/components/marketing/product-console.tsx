@@ -28,7 +28,7 @@ export function ProductConsole({ stage, compact = false, className }: { stage: C
   const showList = !compact && (stage === 'detected' || stage === 'analysis')
 
   return (
-    <div className={cn('border border-line bg-[#0c1322] text-left', className)}>
+    <div className={cn('border border-line bg-surface text-left', className)}>
       <div className="flex h-9 items-center gap-3 border-b border-line px-3 font-mono text-[11px] text-muted">
         <span className="text-foreground">northline/payment-gateway</span>
         <span>main</span>
