@@ -175,81 +175,157 @@ export function RepoSphere({
       const cy = height * 0.46
       const radius = Math.min(width, height) * (variant === 'process' ? 0.28 : width < 480 ? 0.22 : 0.33)
 
-      const glow = context.createRadialGradient(cx, cy, radius * 0.05, cx, cy, radius * 1.45)
-      glow.addColorStop(0, rgba(colors.accent, 0.34))
-      glow.addColorStop(0.38, rgba(colors.complement, 0.14))
+      const glow = context.createRadialGradient(cx, cy, radius * 0.02, cx, cy, radius * 1.55)
+      glow.addColorStop(0, rgba(colors.accent, 0.42))
+      glow.addColorStop(0.28, rgba(colors.complement, 0.16))
       glow.addColorStop(1, rgba(colors.complement, 0))
       context.fillStyle = glow
       context.beginPath()
-      context.arc(cx, cy, radius * 1.45, 0, Math.PI * 2)
+      context.arc(cx, cy, radius * 1.55, 0, Math.PI * 2)
       context.fill()
-
-      context.beginPath()
-      context.arc(cx, cy, radius, 0, Math.PI * 2)
-      context.strokeStyle = rgba(colors.complement, 0.35)
-      context.lineWidth = 1.25
-      context.stroke()
 
       const toneColor = (tone: Tone, alpha: number) => rgba(tone === 'accent' ? colors.accent : tone === 'complement' ? colors.complement : tone === 'critical' ? colors.critical : colors.muted, alpha)
 
-      for (const orbit of ORBITS) {
-        const spin = reducedRef.current ? 0.4 : time * orbit.speed
+      const strokeRing = (points: Array<{ x: number; y: number }>, color: string, width: number) => {
         context.beginPath()
-        for (let step = 0; step <= 84; step += 1) {
-          const angle = (step / 84) * Math.PI * 2 + spin
-          let point = { x: Math.cos(angle) * orbit.radius, y: 0, z: Math.sin(angle) * orbit.radius }
-          point = rotY(rotX(point, orbit.tilt), orbit.twist)
-          const projected = project(point, yaw, pitch, cx, cy, radius)
-          if (step === 0) context.moveTo(projected.x, projected.y)
-          else context.lineTo(projected.x, projected.y)
-        }
+        points.forEach((point, step) => {
+          if (step === 0) context.moveTo(point.x, point.y)
+          else context.lineTo(point.x, point.y)
+        })
         context.closePath()
-        context.strokeStyle = toneColor(orbit.tone, orbit.tone === 'complement' ? 0.85 : 0.55)
-        context.lineWidth = orbit.tone === 'complement' ? 1.4 : 1
+        context.strokeStyle = color
+        context.lineWidth = width
         context.stroke()
       }
 
-      for (const edge of SPHERE.edges) {
-        const a = project(SPHERE.verts[edge.a], yaw, pitch, cx, cy, radius)
-        const b = project(SPHERE.verts[edge.b], yaw, pitch, cx, cy, radius)
-        const depth = (a.z + b.z) / 2
-        const alpha = 0.08 + ((depth + 1) / 2) * (edge.tone === 'complement' ? 0.7 : 0.42)
+      const shell = (scale: number, spin: number, tilt: number, alpha: number) => {
+        for (const edge of SPHERE.edges) {
+          const a = project(SPHERE.verts[edge.a], yaw * spin, pitch * tilt, cx, cy, radius * scale)
+          const b = project(SPHERE.verts[edge.b], yaw * spin, pitch * tilt, cx, cy, radius * scale)
+          const depth = (a.z + b.z) / 2
+          context.beginPath()
+          context.moveTo(a.x, a.y)
+          context.lineTo(b.x, b.y)
+          context.strokeStyle = toneColor(edge.tone, alpha * (0.15 + ((depth + 1) / 2) * 0.85))
+          context.lineWidth = scale > 0.7 ? 1.15 : 0.8
+          context.stroke()
+        }
+      }
+      shell(0.42, -1.35, 0.65, 0.55)
+      shell(1, 1, 1, 0.9)
+
+      const north = project({ x: 0, y: 1.16, z: 0 }, yaw, pitch, cx, cy, radius)
+      const south = project({ x: 0, y: -1.16, z: 0 }, yaw, pitch, cx, cy, radius)
+      context.beginPath()
+      context.moveTo(north.x, north.y)
+      context.lineTo(south.x, south.y)
+      context.strokeStyle = rgba(colors.accent, 0.45)
+      context.lineWidth = 1
+      context.stroke()
+
+      for (let tick = 0; tick < 48; tick += 1) {
+        const angle = (tick / 48) * Math.PI * 2
+        const inner = 0.96
+        const outer = tick % 4 === 0 ? 1.14 : 1.06
+        const a = project({ x: Math.cos(angle) * inner, y: 0, z: Math.sin(angle) * inner }, yaw, pitch, cx, cy, radius)
+        const b = project({ x: Math.cos(angle) * outer, y: 0, z: Math.sin(angle) * outer }, yaw, pitch, cx, cy, radius)
         context.beginPath()
         context.moveTo(a.x, a.y)
         context.lineTo(b.x, b.y)
-        context.strokeStyle = toneColor(edge.tone, alpha)
-        context.lineWidth = 1
+        context.strokeStyle = rgba(tick % 2 === 0 ? colors.accent : colors.complement, 0.2 + ((a.z + 1) / 2) * 0.65)
+        context.lineWidth = tick % 4 === 0 ? 1.4 : 0.8
         context.stroke()
+      }
+
+      for (const orbit of ORBITS) {
+        const spin = reducedRef.current ? 0.4 : time * orbit.speed
+        const ring: Array<{ x: number; y: number; z: number }> = []
+        for (let step = 0; step <= 96; step += 1) {
+          const angle = (step / 96) * Math.PI * 2 + spin
+          let point = { x: Math.cos(angle) * orbit.radius, y: 0, z: Math.sin(angle) * orbit.radius }
+          point = rotY(rotX(point, orbit.tilt), orbit.twist)
+          ring.push(project(point, yaw, pitch, cx, cy, radius))
+        }
+        strokeRing(ring, toneColor(orbit.tone, orbit.tone === 'complement' ? 0.9 : 0.62), orbit.tone === 'complement' ? 1.5 : 1)
+        for (let trail = 0; trail < 7; trail += 1) {
+          const angle = spin - trail * 0.09
+          let point = { x: Math.cos(angle) * orbit.radius, y: 0, z: Math.sin(angle) * orbit.radius }
+          point = rotY(rotX(point, orbit.tilt), orbit.twist)
+          const projected = project(point, yaw, pitch, cx, cy, radius)
+          if (projected.z < -0.25) continue
+          context.fillStyle = toneColor(orbit.tone, 0.95 - trail * 0.12)
+          context.beginPath()
+          context.arc(projected.x, projected.y, trail === 0 ? 3.1 : 1.7, 0, Math.PI * 2)
+          context.fill()
+        }
       }
 
       const ringRadius = Math.sqrt(Math.max(0, 1 - sweep * sweep))
       if (ringRadius > 0.04) {
-        context.beginPath()
-        for (let step = 0; step <= 72; step += 1) {
-          const angle = (step / 72) * Math.PI * 2
-          const projected = project({ x: Math.cos(angle) * ringRadius, y: sweep, z: Math.sin(angle) * ringRadius }, yaw, pitch, cx, cy, radius)
-          if (step === 0) context.moveTo(projected.x, projected.y)
-          else context.lineTo(projected.x, projected.y)
+        const band: Array<{ x: number; y: number }> = []
+        for (let step = 0; step <= 80; step += 1) {
+          const angle = (step / 80) * Math.PI * 2
+          band.push(project({ x: Math.cos(angle) * ringRadius, y: sweep, z: Math.sin(angle) * ringRadius }, yaw, pitch, cx, cy, radius))
         }
-        context.strokeStyle = rgba(colors.complement, 0.95)
-        context.lineWidth = 1.6
-        context.stroke()
-        const satellite = project(
-          { x: Math.cos(time * 1.5) * ringRadius, y: sweep, z: Math.sin(time * 1.5) * ringRadius },
+        context.beginPath()
+        band.forEach((point, step) => {
+          if (step === 0) context.moveTo(point.x, point.y)
+          else context.lineTo(point.x, point.y)
+        })
+        context.closePath()
+        context.fillStyle = rgba(colors.complement, 0.08)
+        context.fill()
+        strokeRing(band, rgba(colors.complement, 0.95), 1.8)
+        for (let satellite = 0; satellite < 3; satellite += 1) {
+          const angle = time * (1.2 + satellite * 0.35) + satellite * 2.1
+          for (let trail = 0; trail < 6; trail += 1) {
+            const projected = project(
+              { x: Math.cos(angle - trail * 0.12) * ringRadius, y: sweep, z: Math.sin(angle - trail * 0.12) * ringRadius },
+              yaw,
+              pitch,
+              cx,
+              cy,
+              radius,
+            )
+            context.fillStyle = rgba(trail === 0 ? colors.fg : colors.complement, 0.95 - trail * 0.14)
+            context.beginPath()
+            context.arc(projected.x, projected.y, trail === 0 ? 3.4 : 1.8, 0, Math.PI * 2)
+            context.fill()
+          }
+        }
+      }
+
+      context.save()
+      context.shadowBlur = 14
+      for (let pulse = 0; pulse < 14; pulse += 1) {
+        const theta = (pulse / 14) * Math.PI * 2
+        const phi = ((time * 0.42 + pulse * 0.19) % 1) * Math.PI
+        const projected = project(
+          { x: Math.sin(phi) * Math.cos(theta), y: Math.cos(phi), z: Math.sin(phi) * Math.sin(theta) },
           yaw,
           pitch,
           cx,
           cy,
           radius,
         )
-        context.fillStyle = rgba(colors.fg, 0.95)
+        if (projected.z < -0.2) continue
+        const color = pulse % 2 === 0 ? colors.accent : colors.complement
+        context.shadowColor = color
+        context.fillStyle = rgba(color, 0.95)
         context.beginPath()
-        context.arc(satellite.x, satellite.y, 3.2, 0, Math.PI * 2)
+        context.arc(projected.x, projected.y, pulse % 3 === 0 ? 3.3 : 2.1, 0, Math.PI * 2)
         context.fill()
-        context.strokeStyle = rgba(colors.complement, 0.9)
-        context.lineWidth = 1.5
-        context.stroke()
       }
+      context.restore()
+
+      const core = context.createRadialGradient(cx, cy, 0, cx, cy, radius * 0.2)
+      core.addColorStop(0, rgba(colors.fg, 0.95))
+      core.addColorStop(0.4, rgba(colors.accent, 0.8))
+      core.addColorStop(1, rgba(colors.complement, 0))
+      context.fillStyle = core
+      context.beginPath()
+      context.arc(cx, cy, radius * 0.2, 0, Math.PI * 2)
+      context.fill()
 
       if (variant === 'process') {
         context.font = '11px "JetBrains Mono Variable", ui-monospace, monospace'

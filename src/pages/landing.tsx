@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { LandingField } from '@/components/marketing/landing-field'
 import { ProductConsole, type ConsoleStage } from '@/components/marketing/product-console'
 import { RepoSphere } from '@/components/marketing/repo-sphere'
 import { ScanType } from '@/components/marketing/scan-type'
@@ -65,12 +66,13 @@ export default function Landing() {
   }
 
   return (
-    <div id="top" className="min-h-screen">
+    <div id="top" className="relative min-h-screen">
+      <LandingField />
       {reduced ? null : (
         <motion.div className="fixed inset-x-0 top-0 z-40 h-0.5 origin-left bg-gradient-to-r from-accent to-complement" style={{ scaleX: scrollYProgress }} />
       )}
       <SiteHeader scanTo={scanTo} />
-      <main>
+      <main className="relative z-10">
         <section ref={heroRef} className="relative mx-auto w-full max-w-6xl px-5 pt-24 pb-16 sm:pt-28">
           <div className="pointer-events-none absolute -top-16 left-0 h-[460px] w-[min(640px,80vw)] bg-[radial-gradient(ellipse_at_top_left,rgba(240,193,77,0.2),transparent_64%)]" />
           <div className="pointer-events-none absolute top-8 right-0 h-[480px] w-[min(640px,78vw)] bg-[radial-gradient(ellipse_at_center,rgba(61,126,255,0.22),transparent_62%)]" />
