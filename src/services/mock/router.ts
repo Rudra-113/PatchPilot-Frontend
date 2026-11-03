@@ -81,8 +81,9 @@ function sessionFor(email: string, workspace: Session['workspace']): Session {
 export async function mockRequest<T>(path: string, init?: { method?: string; body?: unknown; session?: Session | null }): Promise<T> {
   const method = (init?.method ?? 'GET').toUpperCase()
   const url = new URL(path, 'http://patchpilot.local')
-  await delay(latency(method, url.pathname))
-  return dispatch(method, url.pathname, url.searchParams, init?.body, init?.session ?? null) as T
+  const pathname = url.pathname.replace(/^\/api\/v1(?=\/|$)/, '') || '/'
+  await delay(latency(method, pathname))
+  return dispatch(method, pathname, url.searchParams, init?.body, init?.session ?? null) as T
 }
 
 function dispatch(method: string, pathname: string, search: URLSearchParams, body: unknown, session: Session | null) {
@@ -121,6 +122,7 @@ function dispatch(method: string, pathname: string, search: URLSearchParams, bod
   if (method === 'POST' && pathname === '/repositories') return connectRepository(body as never)
   if (method === 'GET' && pathname === '/scans') return listScans(search.get('projectId') ?? undefined)
   if (method === 'POST' && pathname === '/scans') return startScan((body as { projectId: string }).projectId)
+  if (method === 'POST' && parts[0] === 'scans' && parts[1]) return startScan(decodeURIComponent(parts[1]))
   if (method === 'GET' && parts[0] === 'scans' && parts[1]) return getScan(parts[1])
   if (method === 'GET' && pathname === '/vulnerabilities') {
     return listVulnerabilities({

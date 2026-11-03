@@ -5,20 +5,20 @@ import { readSession, writeSession } from '@/services/session-store'
 export { readSession }
 
 export async function signIn(credentials: Credentials) {
-  const session = await request<Session>('/auth/session', { method: 'POST', body: credentials })
+  const session = await request<Session>('/api/v1/auth/session', { method: 'POST', body: credentials })
   writeSession(session)
   return session
 }
 
 export async function enterDemo() {
-  const session = await request<Session>('/auth/demo', { method: 'POST' })
+  const session = await request<Session>('/api/v1/auth/demo', { method: 'POST' })
   writeSession(session)
   return session
 }
 
 export async function signOut() {
   try {
-    await request('/auth/session', { method: 'DELETE' })
+    await request('/api/v1/auth/session', { method: 'DELETE' })
   } finally {
     writeSession(null)
   }

@@ -13,20 +13,20 @@ export function listVulnerabilities(query: VulnerabilityQuery = {}) {
     if (value) params.set(key, value)
   }
   const search = params.toString()
-  return request<VulnerabilityListResponse>(`/vulnerabilities${search ? `?${search}` : ''}`)
+  return request<VulnerabilityListResponse>(`/api/v1/vulnerabilities${search ? `?${search}` : ''}`)
 }
 
 export function getVulnerability(vulnerabilityId: string) {
-  return request<Vulnerability>(`/vulnerabilities/${vulnerabilityId}`)
+  return request<Vulnerability>(`/api/v1/vulnerabilities/${vulnerabilityId}`)
 }
 
 export function updateVulnerability(vulnerabilityId: string, status: VulnStatus) {
-  return request<Vulnerability>(`/vulnerabilities/${vulnerabilityId}`, {
+  return request<Vulnerability>(`/api/v1/vulnerabilities/${vulnerabilityId}`, {
     method: 'PATCH',
     body: { status },
   })
 }
 
 export function workspaceMeta() {
-  return request<WorkspaceMeta>('/meta')
+  return request<WorkspaceMeta>('/api/v1/meta')
 }

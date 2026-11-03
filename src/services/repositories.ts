@@ -2,13 +2,13 @@ import type { ConnectRepositoryInput, LookupResult, Repository } from '@/types/a
 import { request } from '@/services/client'
 
 export function listRepositories() {
-  return request<Repository[]>('/repositories')
+  return request<Repository[]>('/api/v1/repositories')
 }
 
 export function lookupRepository(input: { url: string; branch?: string }) {
-  return request<LookupResult>('/repositories/lookup', { method: 'POST', body: input })
+  return request<LookupResult>('/api/v1/repositories/lookup', { method: 'POST', body: input })
 }
 
 export function connectRepository(input: ConnectRepositoryInput) {
-  return request<Repository>('/repositories', { method: 'POST', body: input })
+  return request<Repository>('/api/v1/repositories', { method: 'POST', body: input })
 }
