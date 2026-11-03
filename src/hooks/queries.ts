@@ -98,6 +98,7 @@ export function useVulnerability(vulnerabilityId: string) {
     queryKey: ['vulnerabilities', vulnerabilityId],
     queryFn: () => getVulnerability(vulnerabilityId),
     enabled: Boolean(vulnerabilityId),
+    retry: false,
   })
 }
 

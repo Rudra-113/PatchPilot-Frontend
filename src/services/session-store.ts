@@ -17,3 +17,7 @@ export function writeSession(session: Session | null) {
   if (!session) localStorage.removeItem(KEY)
   else localStorage.setItem(KEY, JSON.stringify(session))
 }
+
+export function isDemoSession() {
+  return readSession()?.workspace === 'demo'
+}

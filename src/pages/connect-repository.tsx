@@ -26,6 +26,8 @@ export default function ConnectRepository() {
   const [branch, setBranch] = useState('main')
   const [resolved, setResolved] = useState<LookupResult | null>(null)
   const [fileName, setFileName] = useState('')
+  const [zipFile, setZipFile] = useState<File | null>(null)
+  const [folderFiles, setFolderFiles] = useState<File[]>([])
   const [error, setError] = useState('')
   const [mode, setMode] = useState<RepoProvider>('github')
 
@@ -57,6 +59,8 @@ export default function ConnectRepository() {
         name: provider === 'github' ? resolved?.name : fileName,
         fileName,
         language: project?.language,
+        file: provider === 'zip' ? zipFile ?? undefined : undefined,
+        files: provider === 'upload' ? folderFiles : undefined,
       })
       const scan = await start.mutateAsync(projectId)
       toast.success('Security scan started')
@@ -140,7 +144,11 @@ export default function ConnectRepository() {
         {mode === 'zip' ? (
           <div className="border border-line bg-surface p-4 shadow-[inset_3px_0_0_var(--accent)]">
             <Label htmlFor="zip">ZIP archive</Label>
-            <Input id="zip" className="mt-1.5 h-11" type="file" accept=".zip,application/zip" onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')} />
+            <Input id="zip" className="mt-1.5 h-11" type="file" accept=".zip,application/zip" onChange={(event) => {
+              const file = event.target.files?.[0] ?? null
+              setZipFile(file)
+              setFileName(file?.name ?? '')
+            }} />
             <p className="mt-2 text-[12px] text-muted">{fileName || 'Choose a .zip export of the repository.'}</p>
             <Button className="mt-4 h-10" disabled={!fileName || connect.isPending} onClick={() => void begin('zip')}>Start Security Scan</Button>
           </div>
@@ -148,7 +156,11 @@ export default function ConnectRepository() {
         {mode === 'upload' ? (
           <div className="border border-line bg-surface p-4 shadow-[inset_3px_0_0_var(--complement)]">
             <Label htmlFor="folder">Repository directory</Label>
-            <Input id="folder" className="mt-1.5 h-11" type="file" multiple onChange={(event) => setFileName(event.target.files?.[0]?.webkitRelativePath?.split('/')[0] || event.target.files?.[0]?.name || '')} {...{ webkitdirectory: '', directory: '' }} />
+            <Input id="folder" className="mt-1.5 h-11" type="file" multiple onChange={(event) => {
+              const files = Array.from(event.target.files ?? [])
+              setFolderFiles(files)
+              setFileName(files[0]?.webkitRelativePath?.split('/')[0] || files[0]?.name || '')
+            }} {...{ webkitdirectory: '', directory: '' }} />
             <p className="mt-2 text-[12px] text-muted">{fileName ? `Selected ${fileName}` : 'Choose the repository root. Files stay in the browser.'}</p>
             <Button className="mt-4 h-10" disabled={!fileName || connect.isPending} onClick={() => void begin('upload')}>Start Security Scan</Button>
           </div>

@@ -36,6 +36,8 @@ The client strips a trailing slash and a trailing `/api/v1`, then prefixes every
 
 From the browser, requests use a same-origin `/api/v1/...` path. Vite, Netlify, and Vercel proxy that path to the Railway origin. Railway’s CORS allowlist does not include every deployed frontend, and a blocked cross-origin response is what the UI reports as “could not be reached.”
 
+The live service implements `GET /api/v1/health`, `POST /api/v1/repositories/upload`, and `POST /api/v1/scans/{repository_id}` plus `analyze`, `patch`, `apply-patch`, `validate-patch`, `remediate`, and `rollback`. Projects, sign-in, overview, settings, and reports stay in the browser. Creating a project does not call `/api/v1/projects`. A ZIP or a selected folder is uploaded, then the scan uses the returned `repository_id`.
+
 The client sends `Authorization: Bearer <session token>`, `Accept: application/json`, and `Content-Type: application/json` for JSON bodies. FastAPI `detail` and `{ "message": "..." }` are both shown. Network failures include the failing URL and the browser error.
 
 ## Netlify

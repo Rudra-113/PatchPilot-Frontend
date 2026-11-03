@@ -1,15 +1,22 @@
 import type { Scan } from '@/types/api'
-import { request } from '@/services/client'
+import { liveGetScan, liveListScans, liveStartScan } from '@/services/live-workspace'
+import { mockRequest } from '@/services/mock/router'
+import { isDemoSession, readSession } from '@/services/session-store'
 
-export function listScans(projectId?: string) {
-  const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : ''
-  return request<Scan[]>(`/api/v1/scans${query}`)
+export async function listScans(projectId?: string) {
+  if (isDemoSession()) {
+    const query = projectId ? `?projectId=${encodeURIComponent(projectId)}` : ''
+    return mockRequest<Scan[]>(`/api/v1/scans${query}`, { session: readSession() })
+  }
+  return liveListScans(projectId)
 }
 
-export function getScan(scanId: string) {
-  return request<Scan>(`/api/v1/scans/${scanId}`)
+export async function getScan(scanId: string) {
+  if (isDemoSession()) return mockRequest<Scan>(`/api/v1/scans/${scanId}`, { session: readSession() })
+  return liveGetScan(scanId)
 }
 
-export function startScan(projectId: string) {
-  return request<Scan>(`/api/v1/scans/${encodeURIComponent(projectId)}`, { method: 'POST' })
+export async function startScan(projectId: string) {
+  if (isDemoSession()) return mockRequest<Scan>(`/api/v1/scans/${encodeURIComponent(projectId)}`, { method: 'POST', session: readSession() })
+  return liveStartScan(projectId)
 }

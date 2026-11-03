@@ -1,14 +1,19 @@
 import type { Report, ReportDocument } from '@/types/api'
-import { request } from '@/services/client'
+import { liveCreateReport, liveGetReport, liveListReports } from '@/services/live-workspace'
+import { mockRequest } from '@/services/mock/router'
+import { isDemoSession, readSession } from '@/services/session-store'
 
-export function listReports() {
-  return request<Report[]>('/api/v1/reports')
+export async function listReports() {
+  if (isDemoSession()) return mockRequest<Report[]>('/api/v1/reports', { session: readSession() })
+  return liveListReports()
 }
 
-export function getReport(reportId: string) {
-  return request<ReportDocument>(`/api/v1/reports/${reportId}`)
+export async function getReport(reportId: string) {
+  if (isDemoSession()) return mockRequest<ReportDocument>(`/api/v1/reports/${reportId}`, { session: readSession() })
+  return liveGetReport(reportId)
 }
 
-export function createReport(input: { title?: string; projectId?: string | null }) {
-  return request<Report>('/api/v1/reports', { method: 'POST', body: input })
+export async function createReport(input: { title?: string; projectId?: string | null }) {
+  if (isDemoSession()) return mockRequest<Report>('/api/v1/reports', { method: 'POST', body: input, session: readSession() })
+  return liveCreateReport(input)
 }

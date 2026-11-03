@@ -306,6 +306,8 @@ export interface ConnectRepositoryInput {
   name?: string
   language?: string
   fileName?: string
+  file?: File
+  files?: File[]
 }
 
 export interface Credentials {

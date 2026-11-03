@@ -1,38 +1,58 @@
 import type { DiffDownload, Patch, PullRequestDraft } from '@/types/api'
-import { request } from '@/services/client'
+import {
+  liveApplyPatch,
+  liveDownloadPatch,
+  liveGeneratePatch,
+  liveGetPatch,
+  liveListPatches,
+  livePatchForVulnerability,
+  livePreparePullRequest,
+  liveStartValidation,
+} from '@/services/live-workspace'
+import { mockRequest } from '@/services/mock/router'
+import { isDemoSession, readSession } from '@/services/session-store'
 
-export function listPatches(vulnerabilityId?: string) {
-  const query = vulnerabilityId ? `?vulnerabilityId=${encodeURIComponent(vulnerabilityId)}` : ''
-  return request<Patch[]>(`/api/v1/patches${query}`)
+export async function listPatches(vulnerabilityId?: string) {
+  if (isDemoSession()) {
+    const query = vulnerabilityId ? `?vulnerabilityId=${encodeURIComponent(vulnerabilityId)}` : ''
+    return mockRequest<Patch[]>(`/api/v1/patches${query}`, { session: readSession() })
+  }
+  return liveListPatches(vulnerabilityId)
 }
 
-export function getPatch(patchId: string) {
-  return request<Patch>(`/api/v1/patches/${patchId}`)
+export async function getPatch(patchId: string) {
+  if (isDemoSession()) return mockRequest<Patch>(`/api/v1/patches/${patchId}`, { session: readSession() })
+  return liveGetPatch(patchId)
 }
 
-export function getPatchForVulnerability(vulnerabilityId: string) {
-  return request<Patch>(`/api/v1/vulnerabilities/${vulnerabilityId}/patch`)
+export async function getPatchForVulnerability(vulnerabilityId: string) {
+  if (isDemoSession()) return mockRequest<Patch>(`/api/v1/vulnerabilities/${vulnerabilityId}/patch`, { session: readSession() })
+  return livePatchForVulnerability(vulnerabilityId)
 }
 
-export function generatePatch(vulnerabilityId: string) {
-  return request<Patch>(`/api/v1/vulnerabilities/${vulnerabilityId}/patches`, { method: 'POST' })
+export async function generatePatch(vulnerabilityId: string) {
+  if (isDemoSession()) return mockRequest<Patch>(`/api/v1/vulnerabilities/${vulnerabilityId}/patches`, { method: 'POST', session: readSession() })
+  return liveGeneratePatch(vulnerabilityId)
 }
 
-export function startValidation(patchId: string) {
-  return request<Patch>(`/api/v1/patches/${patchId}/validation`, { method: 'POST' })
+export async function startValidation(patchId: string) {
+  if (isDemoSession()) return mockRequest<Patch>(`/api/v1/patches/${patchId}/validation`, { method: 'POST', session: readSession() })
+  return liveStartValidation(patchId)
 }
 
-export function downloadPatch(patchId: string) {
-  return request<DiffDownload>(`/api/v1/patches/${patchId}/apply`, { method: 'POST', body: { action: 'download' } })
+export async function downloadPatch(patchId: string) {
+  if (isDemoSession()) return mockRequest<DiffDownload>(`/api/v1/patches/${patchId}/apply`, { method: 'POST', body: { action: 'download' }, session: readSession() })
+  return liveDownloadPatch(patchId)
 }
 
-export function preparePullRequest(patchId: string) {
-  return request<PullRequestDraft>(`/api/v1/patches/${patchId}/apply`, {
-    method: 'POST',
-    body: { action: 'pull_request' },
-  })
+export async function preparePullRequest(patchId: string) {
+  if (isDemoSession()) {
+    return mockRequest<PullRequestDraft>(`/api/v1/patches/${patchId}/apply`, { method: 'POST', body: { action: 'pull_request' }, session: readSession() })
+  }
+  return livePreparePullRequest(patchId)
 }
 
-export function markPatchApplied(patchId: string) {
-  return request<Patch>(`/api/v1/patches/${patchId}/apply`, { method: 'POST', body: { action: 'mark_applied' } })
+export async function markPatchApplied(patchId: string) {
+  if (isDemoSession()) return mockRequest<Patch>(`/api/v1/patches/${patchId}/apply`, { method: 'POST', body: { action: 'mark_applied' }, session: readSession() })
+  return liveApplyPatch(patchId)
 }
