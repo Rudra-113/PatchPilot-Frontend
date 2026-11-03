@@ -1,7 +1,8 @@
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ProductConsole, type ConsoleStage } from '@/components/marketing/product-console'
+import { RepoSphere } from '@/components/marketing/repo-sphere'
 import { ScanType } from '@/components/marketing/scan-type'
 import { SiteHeader } from '@/components/marketing/site-header'
 import { Button } from '@/components/ui/button'
@@ -45,6 +46,13 @@ export default function Landing() {
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
   const { scrollYProgress } = useScroll()
+  const heroRef = useRef<HTMLElement>(null)
+  const consoleRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
+  const { scrollYProgress: consoleProgress } = useScroll({ target: consoleRef, offset: ['start end', 'center center'] })
+  const sphereY = useTransform(heroProgress, [0, 1], [0, 72])
+  const consoleTilt = useTransform(consoleProgress, [0, 1], [11, 0])
+  const consoleLift = useTransform(consoleProgress, [0, 1], [32, 0])
   const scanTo = session ? '/app/projects/new' : '/login?next=/app/projects/new'
 
   const viewDemo = async () => {
@@ -63,46 +71,61 @@ export default function Landing() {
       )}
       <SiteHeader scanTo={scanTo} />
       <main>
-        <section className="relative mx-auto w-full max-w-6xl px-5 pt-24 pb-16 sm:pt-28">
-          <div className="pointer-events-none absolute -top-10 left-0 h-[420px] w-[min(720px,90vw)] bg-[radial-gradient(ellipse_at_top_left,rgba(228,194,122,0.16),transparent_62%)]" />
-          <div className="pointer-events-none absolute top-24 right-0 h-[360px] w-[min(520px,70vw)] bg-[radial-gradient(ellipse_at_top_right,rgba(122,162,240,0.16),transparent_64%)]" />
-          <div className="relative">
-            <p className="flex items-center gap-3 font-mono text-[11px] tracking-[0.18em] text-accent uppercase">
-              <span className="h-px w-8 bg-accent" />
-              Security remediation
-            </p>
-            <h1 className="mt-5 max-w-[11em] text-[44px] leading-[0.96] font-medium tracking-[-0.04em] text-foreground sm:text-[68px] lg:text-[76px]">
-              Autonomous vulnerability remediation for modern codebases.
-            </h1>
-            <p className="mt-6 max-w-md text-[16px] leading-relaxed text-secondary">
-              Detect vulnerabilities. Understand the root cause. Generate secure patches. Validate the fix.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-2">
-              <Button size="lg" className="h-11 px-4" asChild>
-                <Link to={scanTo}>Scan Repository</Link>
-              </Button>
-              <Button size="lg" variant="secondary" className="h-11 px-4" onClick={() => void viewDemo()}>
-                View Demo
-              </Button>
+        <section ref={heroRef} className="relative mx-auto w-full max-w-6xl px-5 pt-24 pb-16 sm:pt-28">
+          <div className="pointer-events-none absolute -top-16 left-0 h-[460px] w-[min(640px,80vw)] bg-[radial-gradient(ellipse_at_top_left,rgba(240,193,77,0.2),transparent_64%)]" />
+          <div className="pointer-events-none absolute top-8 right-0 h-[480px] w-[min(640px,78vw)] bg-[radial-gradient(ellipse_at_center,rgba(61,126,255,0.22),transparent_62%)]" />
+          <div className="relative grid items-center gap-2 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)]">
+            <div>
+              <p className="flex items-center gap-3 font-mono text-[11px] tracking-[0.18em] text-accent uppercase">
+                <span className="h-px w-8 bg-accent" />
+                Security remediation
+              </p>
+              <h1 className="mt-5 max-w-[11em] text-[44px] leading-[0.96] font-medium tracking-[-0.04em] text-foreground sm:text-[68px] lg:text-[76px]">
+                Autonomous vulnerability remediation for modern codebases.
+              </h1>
+              <p className="mt-6 max-w-md text-[16px] leading-relaxed text-secondary">
+                Detect vulnerabilities. Understand the root cause. Generate secure patches. Validate the fix.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2">
+                <Button size="lg" className="h-11 px-4" asChild>
+                  <Link to={scanTo}>Scan Repository</Link>
+                </Button>
+                <Button size="lg" variant="secondary" className="h-11 px-4" onClick={() => void viewDemo()}>
+                  View Demo
+                </Button>
+              </div>
+              <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] text-muted">
+                {['Semgrep', 'CodeQL', 'Bandit', 'Trivy', 'Gitleaks'].map((name, index) => (
+                  <li key={name} className="flex items-center gap-2">
+                    <span className={cn('size-1', index % 2 === 0 ? 'bg-accent' : 'bg-complement')} />
+                    {name}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] text-muted">
-              {['Semgrep', 'CodeQL', 'Bandit', 'Trivy', 'Gitleaks'].map((name, index) => (
-                <li key={name} className="flex items-center gap-2">
-                  <span className={cn('size-1', index % 2 === 0 ? 'bg-accent' : 'bg-complement')} />
-                  {name}
-                </li>
-              ))}
-            </ul>
+            <div className="relative">
+              <motion.div className="relative h-[360px] sm:h-[480px]" style={reduced ? undefined : { y: sphereY }}>
+                <RepoSphere />
+              </motion.div>
+              <p className="pointer-events-none mt-2 text-center font-mono text-[10px] tracking-[0.16em] text-muted uppercase">
+                <span className="text-accent">1,284 files</span>
+                <span className="mx-2 text-line-strong">/</span>
+                <span className="text-complement">scan in motion</span>
+              </p>
+            </div>
           </div>
-          <motion.div
-            className="relative mt-14"
-            initial={reduced ? false : { opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '0px 0px -8% 0px' }}
-            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <ProductConsole stage="detected" />
-          </motion.div>
+          <div ref={consoleRef} className="relative mt-6 [perspective:1400px] lg:mt-2">
+            <motion.div
+              className="origin-center"
+              initial={reduced ? false : { opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              style={reduced ? undefined : { rotateX: consoleTilt, y: consoleLift }}
+            >
+              <ProductConsole stage="detected" />
+            </motion.div>
+          </div>
         </section>
 
         <ScanType />
@@ -149,7 +172,10 @@ export default function Landing() {
 
         <section className="border-t border-line">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-24 sm:py-32 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="max-w-[10em] text-[40px] leading-[0.98] font-medium tracking-[-0.035em] sm:text-[56px]">Hold the merge until the patch verifies.</h2>
+            <div>
+              <div className="mb-6 h-px w-28 bg-gradient-to-r from-accent via-complement to-transparent" />
+              <h2 className="max-w-[10em] text-[40px] leading-[0.98] font-medium tracking-[-0.035em] sm:text-[56px]">Hold the merge until the patch verifies.</h2>
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button size="lg" className="h-10 px-3.5" asChild>
                 <Link to={scanTo}>Scan Repository</Link>
@@ -228,7 +254,7 @@ function Record() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
-                <p className="mt-5 font-mono text-[72px] leading-none tracking-[-0.06em] text-accent">{active.index}</p>
+                <p className={cn('mt-5 font-mono text-[72px] leading-none tracking-[-0.06em]', active.id === 'analysis' ? 'text-complement' : active.id === 'verified' ? 'text-secure' : 'text-accent')}>{active.index}</p>
                 <h2 className="mt-3 text-[36px] leading-none font-medium tracking-[-0.03em]">{active.title}</h2>
                 <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-secondary">{active.body}</p>
               </motion.div>

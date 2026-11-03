@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { RepoSphere } from '@/components/marketing/repo-sphere'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
 const LINES = [
@@ -59,6 +60,13 @@ export function ScanType() {
           <h2 className="mt-3 max-w-[12em] text-[32px] leading-[1.05] font-medium tracking-[-0.03em] sm:text-[42px]">The repository is read before anything is changed.</h2>
           <p className="mt-4 max-w-md text-[15px] leading-relaxed text-secondary">
             Branch, lockfiles, then the scanners. The sink is named in the file it lives in. Nothing is executed.
+          </p>
+          <div className="relative mt-6 h-[300px] sm:h-[340px]">
+            <RepoSphere variant="process" progress={full.length ? typed / full.length : 0} />
+          </div>
+          <p className="font-mono text-[11px] tracking-[0.04em] text-muted">
+            <span className="text-complement">{Math.min(1284, Math.round((full.length ? typed / full.length : 0) * 1284)).toLocaleString('en-US')}</span>
+            <span> of 1,284 files read</span>
           </p>
         </div>
         <div className="border border-line bg-inset shadow-[inset_3px_0_0_var(--complement)]">
