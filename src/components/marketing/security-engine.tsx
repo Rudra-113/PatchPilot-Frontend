@@ -35,7 +35,7 @@ export function SecurityEngine() {
   }, [reduced, pinned])
 
   return (
-    <Frame className="rounded-lg border border-line bg-inset/80 p-4 sm:p-5">
+    <Frame className="border border-line bg-inset/90 p-4 sm:p-5">
       <div className="grid items-center gap-5 lg:grid-cols-[168px_minmax(0,1fr)]">
         <ol className="relative space-y-1">
           {PHASES.map((item, itemIndex) => {
@@ -102,8 +102,8 @@ export function SecurityEngine() {
                   setPinned(next === pinned ? null : next)
                 }}
                 className={cn(
-                  'absolute -translate-x-1/2 -translate-y-1/2 rounded-md border px-2 py-1 font-mono text-[10px] tracking-[0.14em] transition-colors duration-150',
-                  selected ? 'border-accent/60 bg-surface text-foreground' : 'border-line bg-surface/90 text-secondary hover:text-foreground',
+                  'absolute -translate-x-1/2 -translate-y-1/2 border px-2 py-1 font-mono text-[10px] tracking-[0.14em] transition-colors duration-150',
+                  selected ? 'border-accent bg-surface text-foreground' : 'border-line bg-surface/90 text-secondary hover:border-line-strong hover:text-foreground',
                 )}
                 style={{ left: `${node.x}%`, top: `${node.y}%` }}
               >

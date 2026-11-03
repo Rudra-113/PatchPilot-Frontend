@@ -48,7 +48,8 @@ export default function Login() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_440px]">
-      <section className="relative hidden border-r border-line bg-surface lg:flex lg:flex-col lg:justify-between lg:p-10">
+      <section className="relative hidden overflow-hidden border-r border-line bg-surface lg:flex lg:flex-col lg:justify-between lg:p-10">
+        <div className="technical-grid pointer-events-none absolute inset-0 opacity-70" />
         <Wordmark />
         <div>
           <p className="max-w-sm text-[22px] leading-snug font-medium tracking-tight">Detect the sink. Explain it. Prove the patch.</p>

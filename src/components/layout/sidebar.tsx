@@ -30,7 +30,7 @@ function Item({ item, collapsed, onNavigate }: { item: NavItem; collapsed: boole
               transition={{ type: 'spring', stiffness: 420, damping: 34 }}
             />
           ) : null}
-          {isActive ? <span className="absolute top-1.5 bottom-1.5 left-0 w-px bg-accent" /> : null}
+          {isActive ? <span className="absolute top-2 bottom-2 left-0 w-0.5 bg-accent" /> : null}
           <Icon className="relative size-4 shrink-0" strokeWidth={1.75} />
           {collapsed ? null : <span className="relative truncate">{item.label}</span>}
         </>
