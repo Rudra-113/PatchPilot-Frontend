@@ -30,7 +30,10 @@ export function SiteHeader({ scanTo }: { scanTo: string }) {
           <a href="#inventory" className="text-[13px] text-secondary transition-colors duration-150 hover:text-foreground">Inventory</a>
         </nav>
         <div className="flex items-center gap-1">
-          <Link to="/login" className="hidden h-8 items-center px-3 text-[13px] text-secondary transition-colors duration-150 hover:text-foreground sm:inline-flex">
+          <Link
+            to="/login"
+            className="hidden h-8 items-center border border-complement/50 bg-complement/10 px-3 text-[13px] text-foreground transition-colors duration-150 hover:border-complement hover:bg-complement/20 sm:inline-flex"
+          >
             Sign in
           </Link>
           <Button asChild>

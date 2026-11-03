@@ -172,19 +172,33 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="border-t border-line">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-24 sm:py-32 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-6 h-px w-28 bg-gradient-to-r from-accent via-complement to-transparent" />
-              <h2 className="max-w-[10em] text-[40px] leading-[0.98] font-medium tracking-[-0.035em] sm:text-[56px]">Hold the merge until the patch verifies.</h2>
+        <section className="relative overflow-hidden border-t border-line">
+          <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] lg:items-stretch lg:py-28">
+            <div className="flex flex-col justify-between">
+              <div>
+                <p className="font-mono text-[11px] tracking-[0.18em] text-complement uppercase">Before the merge</p>
+                <h2 className="mt-4 max-w-[11em] text-[40px] leading-[0.98] font-medium tracking-[-0.035em] sm:text-[56px]">Hold the merge until the patch verifies.</h2>
+                <p className="mt-5 max-w-md text-[15px] leading-relaxed text-secondary">The finding stays open through the explanation, the diff, and an isolated check. Merge is the last step.</p>
+              </div>
+              <button type="button" onClick={() => void viewDemo()} className="mt-8 w-fit font-mono text-[12px] text-muted underline-offset-4 transition-colors hover:text-accent hover:underline">
+                Or open the Northline demo
+              </button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="lg" className="h-10 px-3.5" asChild>
-                <Link to={scanTo}>Scan Repository</Link>
-              </Button>
-              <Button size="lg" variant="secondary" className="h-10 px-3.5" onClick={() => void viewDemo()}>
-                View Demo
-              </Button>
+            <div className="grid gap-3">
+              <Link to={scanTo} className="group relative overflow-hidden border border-accent/40 bg-accent/8 p-5 transition-colors duration-200 hover:border-accent hover:bg-accent/14">
+                <span className="absolute inset-y-0 left-0 w-1 bg-accent" />
+                <p className="font-mono text-[11px] tracking-[0.16em] text-accent uppercase">Scan repository</p>
+                <h3 className="mt-2 text-[22px] font-medium tracking-tight">Point it at a branch.</h3>
+                <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-secondary">Name the project, then a GitHub URL, a zip, or a folder. The scan types its stages. Nothing is executed.</p>
+                <p className="mt-4 font-mono text-[12px] text-accent">Start a scan →</p>
+              </Link>
+              <Link to="/login" className="group relative overflow-hidden border border-complement/40 bg-complement/8 p-5 transition-colors duration-200 hover:border-complement hover:bg-complement/14">
+                <span className="absolute inset-y-0 left-0 w-1 bg-complement" />
+                <p className="font-mono text-[11px] tracking-[0.16em] text-complement uppercase">Sign in</p>
+                <h3 className="mt-2 text-[22px] font-medium tracking-tight">Open the workspace.</h3>
+                <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-secondary">Any work email and a password of 8 characters. With no API set, the session stays in this browser.</p>
+                <p className="mt-4 font-mono text-[12px] text-complement">Sign in →</p>
+              </Link>
             </div>
           </div>
         </section>
@@ -241,13 +255,20 @@ function Record() {
   }
 
   const active = RECORD[index]
+  const tone = active.id === 'analysis' ? 'text-complement' : active.id === 'verified' ? 'text-secure' : 'text-accent'
 
   return (
     <section id="record" ref={ref} className="relative h-[280vh] scroll-mt-16 border-t border-line">
       <div className="sticky top-12 flex min-h-[calc(100vh-3rem)] items-center">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(240px,0.78fr)_minmax(0,1.22fr)] items-center gap-12 px-5 py-10">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-[minmax(280px,0.82fr)_minmax(0,1.18fr)] items-center gap-10 px-5 py-8">
           <div>
-            <p className="font-mono text-[11px] tracking-[0.16em] text-complement uppercase">The record</p>
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[11px] tracking-[0.16em] text-complement uppercase">The record</p>
+              <p className="font-mono text-[11px] text-muted">{String(index + 1).padStart(2, '0')} / 03</p>
+            </div>
+            <div className="mt-4 h-px overflow-hidden bg-line">
+              <motion.div className="h-full origin-left bg-gradient-to-r from-complement to-accent" style={{ scaleX: scrollYProgress }} />
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={active.id}
@@ -256,32 +277,34 @@ function Record() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
-                <p className={cn('mt-5 font-mono text-[72px] leading-none tracking-[-0.06em]', active.id === 'analysis' ? 'text-complement' : active.id === 'verified' ? 'text-secure' : 'text-accent')}>{active.index}</p>
-                <h2 className="mt-3 text-[36px] leading-none font-medium tracking-[-0.03em]">{active.title}</h2>
+                <p className={cn('mt-6 font-mono text-[84px] leading-none tracking-[-0.06em]', tone)}>{active.index}</p>
+                <h2 className="mt-2 text-[40px] leading-none font-medium tracking-[-0.03em]">{active.title}</h2>
                 <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-secondary">{active.body}</p>
               </motion.div>
             </AnimatePresence>
-            <ol className="mt-8 flex gap-2">
+            <ol className="mt-8 border-t border-line">
               {RECORD.map((step, stepIndex) => {
                 const selected = stepIndex === index
+                const stepTone = step.id === 'analysis' ? 'border-complement text-complement' : step.id === 'verified' ? 'border-secure text-secure' : 'border-accent text-accent'
                 return (
-                  <li key={step.id}>
-                    <button
-                      type="button"
-                      onClick={() => go(stepIndex)}
-                      className={cn(
-                        'h-8 border px-2.5 font-mono text-[11px] transition-colors duration-200',
-                        selected ? 'border-complement bg-complement/10 text-foreground' : 'border-line text-muted hover:text-foreground',
-                      )}
-                    >
-                      {step.index}
+                  <li key={step.id} className="border-b border-line">
+                    <button type="button" onClick={() => go(stepIndex)} className="flex w-full items-baseline gap-4 py-3 text-left">
+                      <span className={cn('w-8 font-mono text-[12px]', selected ? stepTone : 'text-muted')}>{step.index}</span>
+                      <span className={cn('text-[15px] transition-colors duration-200', selected ? 'text-foreground' : 'text-muted')}>{step.title}</span>
+                      {selected ? <span className={cn('ml-auto font-mono text-[10px] tracking-[0.14em] uppercase', stepTone)}>Live</span> : null}
                     </button>
                   </li>
                 )
               })}
             </ol>
           </div>
-          <ProductConsole stage={active.id satisfies ConsoleStage} />
+          <div>
+            <div className="mb-3 flex items-center justify-between font-mono text-[11px] text-muted">
+              <span>northline/payment-gateway</span>
+              <span className={tone}>{active.title}</span>
+            </div>
+            <ProductConsole stage={active.id satisfies ConsoleStage} />
+          </div>
         </div>
       </div>
     </section>

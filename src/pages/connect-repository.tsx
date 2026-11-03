@@ -6,9 +6,9 @@ import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useConnectRepository, useLookupRepository, useProjects, useStartScan } from '@/hooks/queries'
 import { formatWhen, shortSha } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import { ApiError } from '@/services/errors'
 import type { LookupResult, RepoProvider } from '@/types/api'
 
@@ -25,6 +25,7 @@ export default function ConnectRepository() {
   const [resolved, setResolved] = useState<LookupResult | null>(null)
   const [fileName, setFileName] = useState('')
   const [error, setError] = useState('')
+  const [mode, setMode] = useState<RepoProvider>('github')
 
   const resolve = async (event: FormEvent) => {
     event.preventDefault()
@@ -65,11 +66,16 @@ export default function ConnectRepository() {
 
   return (
     <>
-      <PageHeader kicker="02  Repository" title="Connect repository" description="GitHub URLs are parsed in this workspace. Commit metadata is filled locally until the PatchPilot API is connected." />
-      <div className="max-w-2xl space-y-4">
+      <PageHeader kicker="Scan repository" title="Connect the source" description="GitHub URLs are parsed here. No remote is contacted. Commit metadata is filled locally until the PatchPilot API is connected." />
+      <ol className="mb-6 flex max-w-3xl gap-3 font-mono text-[11px] tracking-[0.12em] uppercase">
+        <li className="border border-line px-3 py-2 text-muted">01 Project</li>
+        <li className="border border-complement/50 bg-complement/10 px-3 py-2 text-complement">02 Repository</li>
+        <li className="border border-line px-3 py-2 text-muted">03 Scan</li>
+      </ol>
+      <div className="max-w-3xl space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="project">Project</Label>
-          <select id="project" value={projectId} onChange={(event) => setProjectId(event.target.value)} className="h-9 w-full rounded-md border border-line bg-inset px-3 text-[13px]">
+          <select id="project" value={projectId} onChange={(event) => setProjectId(event.target.value)} className="h-11 w-full border border-line bg-inset px-3 text-[13px]">
             <option value="">Select a project</option>
             {projects.data?.map((project) => (
               <option key={project.id} value={project.id} disabled={Boolean(project.repository)}>
@@ -78,56 +84,75 @@ export default function ConnectRepository() {
             ))}
           </select>
         </div>
-        <Tabs defaultValue="github">
-          <TabsList>
-            <TabsTrigger value="github">GitHub</TabsTrigger>
-            <TabsTrigger value="zip">Upload ZIP</TabsTrigger>
-            <TabsTrigger value="upload">Upload repository</TabsTrigger>
-          </TabsList>
-          <TabsContent value="github" className="mt-4 rounded-lg border border-line bg-surface p-4">
+        <div className="grid gap-2 sm:grid-cols-3">
+          {([
+            ['github', 'GitHub', 'Parse a repository URL. Nothing is fetched.'],
+            ['zip', 'ZIP archive', 'A .zip export. It stays in this browser.'],
+            ['upload', 'Folder', 'The working tree. Files are not uploaded.'],
+          ] as const).map(([key, title, body]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setMode(key)}
+              className={cn(
+                'border p-3 text-left transition-colors duration-150',
+                mode === key ? 'border-accent bg-accent/10 shadow-[inset_0_2px_0_var(--accent)]' : 'border-line bg-surface hover:border-line-strong',
+              )}
+            >
+              <span className="flex items-center gap-2 text-[14px] font-medium">
+                {key === 'github' ? <GithubMark /> : null}
+                {title}
+              </span>
+              <span className="mt-1 block text-[12px] leading-relaxed text-secondary">{body}</span>
+            </button>
+          ))}
+        </div>
+        {mode === 'github' ? (
+          <div className="border border-line bg-surface p-4 shadow-[inset_3px_0_0_var(--complement)]">
             <form onSubmit={(event) => void resolve(event)} className="space-y-3">
-              <div className="flex items-center gap-2 text-[13px]">
-                <GithubMark />
-                Connect GitHub
-              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="url">Repository URL</Label>
-                <Input id="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://github.com/northline/payment-gateway" />
+                <Input id="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://github.com/northline/payment-gateway" className="h-11" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="branch">Branch</Label>
-                <Input id="branch" value={branch} onChange={(event) => setBranch(event.target.value)} />
+                <Input id="branch" value={branch} onChange={(event) => setBranch(event.target.value)} className="h-11" />
               </div>
               <Button type="submit" variant="secondary" disabled={lookup.isPending}>{lookup.isPending ? 'Resolving…' : 'Resolve URL'}</Button>
             </form>
             {resolved ? (
-              <div className="mt-4 rounded-md border border-line bg-inset p-3 text-[13px]">
-                <p className="font-medium">{resolved.name}</p>
+              <div className="mt-4 border border-accent/40 bg-inset p-4 text-[13px]">
+                <p className="font-mono text-[11px] tracking-[0.14em] text-accent uppercase">Resolved locally</p>
+                <p className="mt-1 text-[16px] font-medium">{resolved.name}</p>
                 <p className="mt-1 font-mono text-[12px] text-muted">{resolved.url}</p>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
                   <div><dt className="text-muted">Branch</dt><dd>{resolved.branch}</dd></div>
                   <div><dt className="text-muted">Visibility</dt><dd>{resolved.visibility}</dd></div>
                   <div className="col-span-2"><dt className="text-muted">Last commit</dt><dd>{resolved.lastCommit ? `${shortSha(resolved.lastCommit.sha)} · ${resolved.lastCommit.message} · ${formatWhen(resolved.lastCommit.committedAt)}` : 'Not fetched. The API will fill this when GitHub is connected.'}</dd></div>
                 </dl>
-                <Button className="mt-3" disabled={connect.isPending || start.isPending} onClick={() => void begin('github')}>
+                <Button className="mt-4 h-10" disabled={connect.isPending || start.isPending} onClick={() => void begin('github')}>
                   Start Security Scan
                 </Button>
               </div>
             ) : null}
-          </TabsContent>
-          <TabsContent value="zip" className="mt-4 rounded-lg border border-line bg-surface p-4">
+          </div>
+        ) : null}
+        {mode === 'zip' ? (
+          <div className="border border-line bg-surface p-4 shadow-[inset_3px_0_0_var(--accent)]">
             <Label htmlFor="zip">ZIP archive</Label>
-            <Input id="zip" className="mt-1.5" type="file" accept=".zip,application/zip" onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')} />
+            <Input id="zip" className="mt-1.5 h-11" type="file" accept=".zip,application/zip" onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')} />
             <p className="mt-2 text-[12px] text-muted">{fileName || 'Choose a .zip export of the repository.'}</p>
-            <Button className="mt-3" disabled={!fileName || connect.isPending} onClick={() => void begin('zip')}>Start Security Scan</Button>
-          </TabsContent>
-          <TabsContent value="upload" className="mt-4 rounded-lg border border-line bg-surface p-4">
+            <Button className="mt-4 h-10" disabled={!fileName || connect.isPending} onClick={() => void begin('zip')}>Start Security Scan</Button>
+          </div>
+        ) : null}
+        {mode === 'upload' ? (
+          <div className="border border-line bg-surface p-4 shadow-[inset_3px_0_0_var(--complement)]">
             <Label htmlFor="folder">Repository directory</Label>
-            <Input id="folder" className="mt-1.5" type="file" multiple onChange={(event) => setFileName(event.target.files?.[0]?.webkitRelativePath?.split('/')[0] || event.target.files?.[0]?.name || '')} {...{ webkitdirectory: '', directory: '' }} />
+            <Input id="folder" className="mt-1.5 h-11" type="file" multiple onChange={(event) => setFileName(event.target.files?.[0]?.webkitRelativePath?.split('/')[0] || event.target.files?.[0]?.name || '')} {...{ webkitdirectory: '', directory: '' }} />
             <p className="mt-2 text-[12px] text-muted">{fileName ? `Selected ${fileName}` : 'Choose the repository root. Files stay in the browser.'}</p>
-            <Button className="mt-3" disabled={!fileName || connect.isPending} onClick={() => void begin('upload')}>Start Security Scan</Button>
-          </TabsContent>
-        </Tabs>
+            <Button className="mt-4 h-10" disabled={!fileName || connect.isPending} onClick={() => void begin('upload')}>Start Security Scan</Button>
+          </div>
+        ) : null}
         {error ? <p className="text-[13px] text-critical">{error}</p> : null}
       </div>
     </>
